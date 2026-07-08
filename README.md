@@ -1,25 +1,26 @@
+
 # novel-writer
 
-AI-powered multi-agent novel writing tool. Uses a team of specialized AI agents (Planner, Writer, Reviewer, Memory) to plan, write, review, and revise novels chapter by chapter.
+AI 驱动的多智能体小说写作工具。使用一组专门的 AI 智能体（规划师、作家、审稿人、记忆库）逐章规划、写作、审阅和修订小说。
 
-## Features
+## 特性
 
-- **Multi-agent pipeline**: Planner, Writer, Reviewer, and Memory agents collaborate autonomously
-- **Chapter-by-chapter writing**: Each chapter written with minimal context to maintain quality and handle long-form narratives
-- **Review & Revision loop**: Chapters are automatically reviewed and revised until they meet quality thresholds
-- **Automatic consistency check**: Final pass checks for plot holes, character arc issues, and unresolved threads
-- **Word count enforcement**: Configurable target word count determines chapter count; pre-review word count check (2500-3500 target) triggers auto-rewrites
-- **Interactive mode**: Run the full pipeline or individual steps via a CLI prompt
-- **Edit commands**: Modify novel info, characters, plot threads, and chapters without restarting
-- **Memory management**: Key events, character development, and plot thread progress tracked per chapter
-- **SQLite storage**: All novels, chapters, characters, and review data stored locally
+- **多智能体流水线**：规划师、作家、审稿人和记忆库智能体自主协作
+- **逐章写作**：每章在最小上下文中写作，以保持质量并处理长篇叙事
+- **审阅与修订循环**：章节会自动审阅和修订，直到达到质量阈值
+- **自动一致性检查**：最终检查情节漏洞、角色弧光问题和未解决的线索
+- **字数控制**：可配置的目标字数决定章节数；写前字数检查（目标 2500-3500 字）触发自动重写
+- **交互模式**：通过 CLI 提示符运行完整流水线或单独步骤
+- **编辑命令**：无需重启即可修改小说信息、角色、情节线索和章节
+- **记忆管理**：每章跟踪关键事件、角色发展和情节线索进展
+- **SQLite 存储**：所有小说、章节、角色和审阅数据都存储在本地
 
-## Requirements
+## 环境要求
 
 - Python 3.10+
-- OpenAI-compatible API (tested with DeepSeek, works with any OpenAI-compatible provider)
+- 兼容 OpenAI 接口的 API（已在 DeepSeek 上测试，适用于任何兼容 OpenAI 接口的提供商）
 
-## Quick Start
+## 快速开始
 
 ```
 pip install openai rich
@@ -29,102 +30,102 @@ pip install openai rich
 python -m novel_writer configure
 ```
 
-You will be prompted for:
-- API Key
-- Base URL (defaults to https://api.deepseek.com/v1)
-- Model name (defaults to deepseek-chat)
+系统将提示你输入：
+- API 密钥
+- Base URL（默认为 https://api.deepseek.com/v1）
+- 模型名称（默认为 deepseek-chat）
 
-Configuration is saved to ~/.novel_writer_config.json.
+配置将保存到 ~/.novel_writer_config.json。
 
-## Usage
+## 用法
 
-### CLI Commands
+### CLI 命令
 
-| Command | Description |
+| 命令 | 描述 |
 |---|---|
-| python -m novel_writer configure | Set API key and model |
-| python -m novel_writer create | Create a new novel |
-| python -m novel_writer list | List all novels |
-| python -m novel_writer plan <id> | Generate outline with AI |
-| python -m novel_writer status <id> | Show novel progress |
-| python -m novel_writer write <id> [ch] | Write a chapter |
-| python -m novel_writer review <id> <ch> | Review a chapter |
-| python -m novel_writer pipeline <id> [s] [e] | Run full pipeline |
-| python -m novel_writer pipeline:1 <id> <ch> | Run pipeline for one chapter |
-| python -m novel_writer consistency <id> | Final consistency check |
-| python -m novel_writer edit novel <id> | Edit novel info |
-| python -m novel_writer edit char <id> <name> | Edit a character |
-| python -m novel_writer edit thread <id> <name> | Edit a plot thread |
-| python -m novel_writer edit ch <id> <num> | Edit a chapter |
-| python -m novel_writer interactive | Interactive REPL mode |
+| python -m novel_writer configure | 设置 API 密钥和模型 |
+| python -m novel_writer create | 创建一部新小说 |
+| python -m novel_writer list | 列出所有小说 |
+| python -m novel_writer plan <id> | 使用 AI 生成大纲 |
+| python -m novel_writer status <id> | 显示小说进度 |
+| python -m novel_writer write <id> [ch] | 撰写一章 |
+| python -m novel_writer review <id> <ch> | 审阅一章 |
+| python -m novel_writer pipeline <id> [s] [e] | 运行完整流水线 |
+| python -m novel_writer pipeline:1 <id> <ch> | 为一章运行流水线 |
+| python -m novel_writer consistency <id> | 最终一致性检查 |
+| python -m novel_writer edit novel <id> | 编辑小说信息 |
+| python -m novel_writer edit char <id> <name> | 编辑角色 |
+| python -m novel_writer edit thread <id> <name> | 编辑情节线索 |
+| python -m novel_writer edit ch <id> <num> | 编辑某一章 |
+| python -m novel_writer interactive | 交互式 REPL 模式 |
 
-### Interactive Mode
+### 交互模式
 
 ```
 python -m novel_writer interactive
 ```
 
-Type `help` inside to see available commands.
+进入后输入 `help` 查看可用命令。
 
-### Typical Workflow
+### 典型工作流程
 
-1. **Configure**: Set up API credentials
-2. **Create**: Define your novel (title, genre, premise, target word count)
-3. **Plan**: AI generates outline (characters, plot threads, chapter structure)
-4. **Pipeline**: Runs Write -> Word-Count Check -> Review -> (Auto-Revise) -> Memory Update per chapter
-5. **Consistency**: Final check across the entire novel
+1. **配置**：设置 API 凭证
+2. **创建**：定义你的小说（标题、类型、前提、目标字数）
+3. **规划**：AI 生成大纲（角色、情节线索、章节结构）
+4. **流水线**：每章依次执行 写作 -> 字数检查 -> 审阅 -> (自动修订) -> 记忆更新
+5. **一致性检查**：对整个小说进行最终检查
 
-## Architecture
+## 架构
 
 ```
 novel_writer/
-  __main__.py          CLI and interactive entry point
-  config.py            Configuration load/save
+  __main__.py          CLI 和交互入口
+  config.py            配置加载/保存
   agents/
-    base.py            Base LLM agent with retry and JSON parsing
-    planner.py         Novel outline generation
-    writer.py          Chapter writing
-    reviewer.py        Chapter review and scoring
-    memory.py          Story memory management
+    base.py            基础 LLM 智能体，带重试和 JSON 解析
+    planner.py         小说大纲生成
+    writer.py          章节写作
+    reviewer.py        章节审阅和评分
+    memory.py          故事记忆管理
   context/
-    prompts.py         System and user prompt templates
-    builder.py         Minimal-context assembly for each agent
+    prompts.py         系统和用户提示模板
+    builder.py         为各智能体组装最小上下文
   db/
-    schema.py          SQLite schema and connection management
-    repository.py      Data access layer
+    schema.py          SQLite 模式与连接管理
+    repository.py      数据访问层
   workflow/
-    orchestrator.py    Workflow coordination and pipeline logic
+    orchestrator.py    工作流协调与流水线逻辑
   requirements.txt
 ```
 
-### Pipeline Flow
+### 流水线流程
 
 ```
-Plan -> [for each chapter: Write -> [Word-Count Check -> Rewrite] -> Review -> [Score < 65 -> Revise -> Re-review] -> Memory Update] -> Consistency Check
+规划 -> [对每一章：写作 -> [字数检查 -> 重写] -> 审阅 -> [分数 < 65 -> 修订 -> 重新审阅] -> 记忆更新] -> 一致性检查
 ```
 
-## Database Schema
+## 数据库模式
 
-SQLite database (novel_writer.db). Key tables:
+SQLite 数据库（novel_writer.db）。主要表：
 
-- **novels**: Title, genre, language, premise, style guide, word count goal
-- **characters**: Name, role, personality, appearance, background, arc, relationships (JSON)
-- **chapters**: Number, title, outline, POV, characters, plot threads, status
-- **chapter_contents**: Versioned content, summary, key events
-- **plot_threads**: Name, description, status, related chapters
-- **review_notes**: Issues, score, assessment per review round
-- **world_entries**: World-building entries by category
-- **global_memory**: Key-value store for plot threads, character arcs, foreshadowing
+- **novels**：标题、类型、语言、前提、风格指南、字数目标
+- **characters**：姓名、角色、性格、外貌、背景、弧光、关系（JSON）
+- **chapters**：编号、标题、大纲、视角、角色、情节线索、状态
+- **chapter_contents**：版本化内容、摘要、关键事件
+- **plot_threads**：名称、描述、状态、相关章节
+- **review_notes**：每轮审阅的问题、分数、评估
+- **world_entries**：按类别划分的世界构建条目
+- **global_memory**：用于情节线索、角色弧光、伏笔的键值存储
 
-## Quality Controls
+## 质量控制
 
-- **Review threshold**: Score below 65 triggers automatic revision (up to 2 rounds)
-- **Word count**: Chapters flagged if outside [2500, 3500]; up to 3 automatic rewrites
-- **Consistency check**: Final pass identifies continuity, character arc, timeline, and unresolved thread issues
+- **审阅阈值**：分数低于 65 分将触发自动修订（最多 2 轮）
+- **字数检查**：章节字数超出 [2500, 3500] 区间会被标记；最多 3 次自动重写
+- **一致性检查**：最终检查识别连贯性、角色弧光、时间线和未解决线索等问题
 
-## Configuration
+## 配置
 
-Stored in ~/.novel_writer_config.json:
+保存在 ~/.novel_writer_config.json：
 
 ```json
 {
@@ -136,6 +137,6 @@ Stored in ~/.novel_writer_config.json:
 }
 ```
 
-## License
+## 许可证
 
 MIT
