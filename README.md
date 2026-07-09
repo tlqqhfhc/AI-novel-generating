@@ -57,6 +57,7 @@ python -m novel_writer configure
 | python -m novel_writer edit char <id> <name> | 编辑角色 |
 | python -m novel_writer edit thread <id> <name> | 编辑情节线索 |
 | python -m novel_writer edit ch <id> <num> | 编辑某一章 |
+| python -m novel_writer export <id> | 将完整小说导出为 Markdown 文件存储在novel文件夹中 |
 | python -m novel_writer interactive | 交互式 REPL 模式 |
 
 ### 交互模式

@@ -15,13 +15,16 @@ Usage:
   python -m novel_writer edit char <id> <name>  Edit character
   python -m novel_writer edit thread <id> <name>  Edit plot thread
   python -m novel_writer edit ch <id> <num>  Edit chapter
+  python -m novel_writer export <id>     Export novel to Markdown
   python -m novel_writer interactive     Interactive mode
 """
 
+import os
 import sys
 
 from .config import load_config, save_config
 from .workflow.orchestrator import Orchestrator
+from .db import repository as repo
 from rich.console import Console
 from rich.panel import Panel
 from rich.prompt import Prompt, Confirm
@@ -206,6 +209,7 @@ def cmd_interactive():
   [cyan]edit char <id> <n>[/cyan] Edit character
   [cyan]edit thread <id> <n>[/cyan] Edit plot thread
   [cyan]edit ch <id> <n>[/cyan]   Edit chapter
+  [cyan]export <id>[/cyan]        Export novel to Markdown
   [cyan]help[/cyan]               Show this help
   [cyan]exit[/cyan]               Exit
             """)
@@ -255,6 +259,8 @@ def cmd_interactive():
                 orchestrator.run_chapter_pipeline(int(parts[1]), int(parts[2]))
             elif action == "check" and len(parts) >= 2:
                 orchestrator.final_consistency_check(int(parts[1]))
+            elif action == "export" and len(parts) >= 2:
+                cmd_export(parts[1])
             elif action == "edit":
                 if len(parts) < 3:
                     console.print("[red]Usage: edit novel|char|thread|ch <id> [name] ...[/red]")
@@ -417,6 +423,87 @@ def cmd_edit(args):
         orchestrator.close()
 
 
+
+def cmd_export(novel_id_str):
+    novel_id = int(novel_id_str)
+    config = load_config()
+    orchestrator = Orchestrator(config)
+    conn = orchestrator.conn
+
+    novel = repo.get_novel(conn, novel_id)
+    if not novel:
+        console.print("[red]Novel not found[/red]")
+        orchestrator.close()
+        return
+
+    chapters = repo.get_novel_chapters(conn, novel_id)
+    characters = repo.get_novel_characters(conn, novel_id)
+
+    md = []
+    md.append(f"# {novel['title']}")
+    md.append("")
+    if novel.get("premise"):
+        md.append(f"> {novel['premise']}")
+        md.append("")
+    md.append(f"- **Genre:** {novel.get('genre', 'N/A')}")
+    md.append(f"- **Language:** {novel.get('language', 'zh')}")
+    md.append(f"- **Style:** {novel.get('style_guide', 'Standard')}")
+    md.append(f"- **Target Audience:** {novel.get('target_audience', 'N/A')}")
+    md.append(f"- **Created:** {novel.get('created_at', '')}")
+    md.append("")
+    md.append("---")
+    md.append("")
+
+    if characters:
+        md.append("## Characters")
+        md.append("")
+        for c in characters:
+            md.append(f"### {c['name']} ({c.get('role', 'Unknown')})")
+            if c.get("personality"):
+                md.append(f"- **Personality:** {c['personality']}")
+            if c.get("appearance"):
+                md.append(f"- **Appearance:** {c['appearance']}")
+            if c.get("background"):
+                md.append(f"- **Background:** {c['background']}")
+            if c.get("arc"):
+                md.append(f"- **Arc:** {c['arc']}")
+            md.append("")
+
+    written_count = 0
+    for ch in chapters:
+        content_rec = repo.get_chapter_content(conn, ch["id"])
+        chapter_title = ch.get("title", "") or f"Chapter {ch['chapter_number']}"
+
+        md.append(f"## Chapter {ch['chapter_number']}: {chapter_title}")
+        if ch.get("pov"):
+            md.append(f"*POV: {ch['pov']}*")
+        if ch.get("outline"):
+            md.append("")
+            md.append(f"*Outline: {ch['outline']}*")
+        md.append("")
+
+        if content_rec and content_rec.get("content", "").strip():
+            md.append(content_rec["content"].strip())
+            written_count += 1
+        else:
+            md.append("*[Content not yet written]*")
+        md.append("")
+        md.append("---")
+        md.append("")
+
+    novels_dir = config.get("novels_dir", "./novels")
+    os.makedirs(novels_dir, exist_ok=True)
+    safe_title = novel["title"].replace(" ", "_").replace("/", "-").replace("\\", "-")[:64]
+    filepath = os.path.join(novels_dir, f"{safe_title}.md")
+
+    with open(filepath, "w", encoding="utf-8") as f:
+        f.write("\n".join(md))
+
+    total_ch = len(chapters)
+    console.print(f"\n[green]Exported [bold]{novel['title']}[/bold] to [cyan]{filepath}[/cyan][/green]")
+    console.print(f"  Chapters: {written_count}/{total_ch} written, {total_ch - written_count} pending")
+    orchestrator.close()
+
 def main():
     if len(sys.argv) < 2:
         console.print(__doc__.strip())
@@ -435,6 +522,7 @@ def main():
         "pipeline:1": lambda: cmd_pipeline_one(args[0], args[1]) if len(args) >= 2 else console.print("[red]Missing novel ID or chapter[/red]"),
         "consistency": lambda: cmd_consistency(args[0]) if args else console.print("[red]Missing novel ID[/red]"),
         "edit": lambda: cmd_edit(args) if len(args) >= 2 else console.print("[red]Usage: edit novel|char|thread|ch ...[/red]"),
+        "export": lambda: cmd_export(args[0]) if args else console.print("[red]Missing novel ID[/red]"),
         "interactive": lambda: cmd_interactive(),
     }
     handler = commands.get(command)
