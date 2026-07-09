@@ -37,3 +37,6 @@ build/
 
 # pip / setuptools
 Pipfile.lock
+
+# Novels
+novels/
